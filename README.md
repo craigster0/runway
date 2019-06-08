@@ -1,11 +1,8 @@
 Runway
 ======
 
-A project to help you take flight with OpenStack Swift.
-
-Runway sets up a swift-all-in-one (SAIO) dev environment in an lxc container.
-Eventually it will also include swift3, metadata searching,
-and other ecosystem projects.
+Runway is a project to help you take flight with OpenStack Swift. It sets up a
+swift-all-in-one (SAIO) dev environment in an lxd container.
 
 This project has three target use cases:
  - Developers looking to contribute code to any of the constituent projects
@@ -37,12 +34,13 @@ development environment must satisfy these requirements:
 Manifests
 ---------
 
-Runway is meant to be used to run OpenStack Swift, but besides that, not everybody has
-the same needs. For instance, if you want to work on ProxyFS, there are several additional
-repos that you will need to clone.  Runway uses Manifest files to allow users to customize
-Runway for their needs.
+Runway is meant to be used to run OpenStack Swift, but besides that, not
+everybody has the same needs. For instance, if you want to work on ProxyFS,
+there are several additional repos that you will need to clone.  Runway uses
+Manifest files to allow users to customize Runway for their needs.
 
-You can read all the details on how to create a new manifest in [the manifest readme file](https://github.com/swiftstack/runway/blob/master/README_MANIFEST.md),
+You can read all the details on how to create a new manifest in
+[the manifest readme file](https://github.com/swiftstack/runway/blob/master/README_MANIFEST.md),
 but all most users will need to know is which manifest file to use.
 
 You can create your own manifests, but we've provided some sample manifests in
@@ -51,7 +49,8 @@ the `manifests` directory that you can use:
 - `default_manifest.cfg`: if you don't specify a manifest, this is the one that
 will be used. It loads Swift, liberasurecode and python-swiftclient.
 - `proxyfs_manifest.cfg`: in addition to everything included in the default
-manifest, this manifest includes ProxyFS and the ProxyFS functional tests.
+manifest, this manifest includes ProxyFS, swift3, and some settings optimized
+for ProxyFS.
 - `saio_manifest.cfg`: manifest for running Swift, optimized for SAIO
 development, with 8 10GB drives.
 - `tiny_manifest.cfg`: manifest for running Swift, optimized for an app test
@@ -148,7 +147,7 @@ sudo start_and_mount_pfs
 ```
 
 Running the command above without any extra arguments will mount an SMB mount
-point at `/mnt/smb_proxyfs_mount` using protocol version `1.0` and an NFS mount
+point at `/mnt/smb_proxyfs_mount` using protocol version `3.0` and an NFS mount
 point at `/mnt/nfs_proxyfs_mount` using protocol version `3`.
 
 If you only need one type of mount point or if you want a specific version of a
@@ -156,21 +155,21 @@ protocol, you can specify it when running the script. Here's a complete list
 with all the options:
 
 - `all` (default option): mount an SMB mount
-point at `/mnt/smb_proxyfs_mount` using protocol version `1.0` and an NFS mount
+point at `/mnt/smb_proxyfs_mount` using protocol version `3.0` and an NFS mount
 point at `/mnt/nfs_proxyfs_mount` using protocol version `3`.
-- `smb`/`smb1`: mount an SMB mount point at `/mnt/smb_proxyfs_mount` using
-protocol version `1.0`.
+- `smb`/`smb3`: mount an SMB mount point at `/mnt/smb_proxyfs_mount` using
+protocol version `3.0`.
+- `smb1`: mount an SMB mount point at `/mnt/smb_proxyfs_mount` using protocol
+version `1.0`.
 - `smb2`: mount an SMB mount point at `/mnt/smb_proxyfs_mount` using protocol
 version `2.1`.
-- `smb3`: mount an SMB mount point at `/mnt/smb_proxyfs_mount` using protocol
-version `3.0`.
 - `nfs`: mount an NFS mount point at `/mnt/nfs_proxyfs_mount` using protocol
 version `3`.
 
 Usage example:
 
 ```bash
-sudo start_and_mount_pfs smb3
+sudo start_and_mount_pfs smb2
 ```
 
 _NOTE: running `start_and_mount_pfs` again will unmount all the mount points,
@@ -189,15 +188,16 @@ sudo unmount_and_stop_pfs
 Re-build ProxyFS:
 
 ```bash
-cd /home/swift/code/ProxyFS/src/github.com/swiftstack/ProxyFS
-./regression_test.py
+cdpfs
+make
 ```
 
 Install/re-build pfs_middleware. You will need it if you add new .py files to
 the middleware:
 
 ```bash
-cd /home/swift/code/ProxyFS/src/github.com/swiftstack/ProxyFS/pfs_middleware
+cdpfs
+cd pfs_middleware
 python setup.py develop
 ```
 
@@ -205,7 +205,8 @@ Install/re-build meta_middleware. You will need it if you add new .py files to
 the middleware:
 
 ```bash
-cd /home/swift/code/ProxyFS/src/github.com/swiftstack/ProxyFS/meta_middleware
+cdpfs
+cd meta_middleware
 python setup.py develop
 ```
 
@@ -250,25 +251,12 @@ vagrant destroy
 After this, you can re-create your environment just by running:
 
 ```bash
-vagrant up
-```
-
-After your VM and container are up and running with this method, but before you
-actually start using them, you'll need to manually restart them:
-
-```bash
-vagrant ssh
-lxc list
-lxc stop <your-container-name>
-exit
-vagrant reload
-vagrant ssh
-lxc start <your-container-name>
-exit
+bin/build_vm_and_container.py -w <your-workspace-name>
 ```
 _NOTE: Your container name will typically be something like `swift-runway-XXX`,
-where `XXX` is a number from 001 to 999 (usually 001). To check your container
-name, you can run `lxc list` inside your VM (second step in the list above)._
+where `XXX` is a number between 001 and 999 (usually 001). To check your
+container name, you can run `lxc list` inside your VM (second step in the list
+above)._
 
 
 **Delete all your containers, your VM and all your code/components:**
@@ -277,8 +265,8 @@ name, you can run `lxc list` inside your VM (second step in the list above)._
 bin/cleanup_runway.sh
 ```
 _**WARNING**: running the command above will delete all the code from all your
-components. Please, double-check you don't have any unsaved/uncommitted work
-before your run it._
+components in ALL your workspaces. Please, double-check you don't have any
+unsaved/uncommitted work before your run it._
 
 After this, you can re-create your environment by following all the steps in
 section "Quick install".
