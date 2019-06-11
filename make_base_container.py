@@ -18,6 +18,8 @@ VG_NAME = "swift-runway-vg01"
 SWIFTSTACK_IMAGES_PREFIX = "ss-"
 SWIFTSTACK_IMAGES_BASE_URL = \
     "https://tellus.swiftstack.com/v1/AUTH_runway/lxd-images"
+BACKUP_SWIFTSTACK_IMAGES_BASE_URL = \
+    "https://cloud.swiftstack.com/v1/AUTH_runway/lxd-images"
 IMAGE_MANIFEST_OBJECT_NAME = "manifest.json"
 UNIFIED_TARBALL_TYPE = "unified"
 SPLIT_TARBALL_TYPE = "split"
@@ -40,9 +42,13 @@ def is_swiftstack_hosted_image(base_image):
     return base_image.lower().startswith(SWIFTSTACK_IMAGES_PREFIX)
 
 
-def get_image_manifest(swift_container_name):
-    manifest_obj_url = "{}/{}/{}".format(SWIFTSTACK_IMAGES_BASE_URL,
-                                         swift_container_name,
+def get_image_manifest(swift_container_name, use_backup_url=False):
+    if use_backup_url:
+        base_url = BACKUP_SWIFTSTACK_IMAGES_BASE_URL
+    else:
+        base_url = SWIFTSTACK_IMAGES_BASE_URL
+
+    manifest_obj_url = "{}/{}/{}".format(base_url, swift_container_name,
                                          IMAGE_MANIFEST_OBJECT_NAME)
 
     try:
@@ -50,8 +56,13 @@ def get_image_manifest(swift_container_name):
         r.raise_for_status()
         return r.json()
     except Exception as e:
-        raise Exception("Could not download container image manifest from '{}'."
-                        "\n{}".format(manifest_obj_url, e))
+        if not use_backup_url:
+            print("Could not download container image manifest from its "
+                  "primary location. Retrying with backup location...")
+            return get_image_manifest(swift_container_name, True)
+        else:
+            raise Exception("Could not download container image manifest from "
+                            "'{}'.\n{}".format(manifest_obj_url, e))
 
 
 def is_image_already_imported(fingerprint):
@@ -70,8 +81,13 @@ def delete_image_with_alias(alias):
         pass
 
 
-def download_unified_image_file(manifest):
-    tarball_url = "{}/{}".format(SWIFTSTACK_IMAGES_BASE_URL,
+def download_unified_image_file(manifest, use_backup_url=False):
+    if use_backup_url:
+        base_url = BACKUP_SWIFTSTACK_IMAGES_BASE_URL
+    else:
+        base_url = SWIFTSTACK_IMAGES_BASE_URL
+
+    tarball_url = "{}/{}".format(base_url,
                                  manifest["tarball-object"])
 
     try:
@@ -83,7 +99,13 @@ def download_unified_image_file(manifest):
                 if chunk:  # filter out keep-alive new chunks
                     f.write(chunk)
     except Exception as e:
-        print("Could not download file from '{}': {}".format(tarball_url, e))
+        if not use_backup_url:
+            print("Could not download unified image from its primary "
+                  "location. Retrying with backup location...")
+            return download_unified_image_file(manifest, True)
+        else:
+            raise Exception("Could not download file from '{}': "
+                            "{}".format(tarball_url, e))
 
     return file_path
 
@@ -96,10 +118,15 @@ def import_unified_image(manifest, alias):
     os.unlink(tarball_path)
 
 
-def download_split_image_files(manifest):
-    metadata_tarball_url = "{}/{}".format(SWIFTSTACK_IMAGES_BASE_URL,
+def download_split_image_files(manifest, use_backup_url=False):
+    if use_backup_url:
+        base_url = BACKUP_SWIFTSTACK_IMAGES_BASE_URL
+    else:
+        base_url = SWIFTSTACK_IMAGES_BASE_URL
+
+    metadata_tarball_url = "{}/{}".format(base_url,
                                           manifest["metadata-object"])
-    rootfs_tarball_url = "{}/{}".format(SWIFTSTACK_IMAGES_BASE_URL,
+    rootfs_tarball_url = "{}/{}".format(base_url,
                                         manifest["rootfs-object"])
     file_paths = []
 
@@ -113,7 +140,13 @@ def download_split_image_files(manifest):
                     if chunk:  # filter out keep-alive new chunks
                         f.write(chunk)
         except Exception as e:
-            print("Could not download file from '{}': {}".format(url, e))
+            if not use_backup_url:
+                print("Could not download split image from its primary "
+                      "location. Retrying with backup location...")
+                return download_split_image_files(manifest, True)
+            else:
+                raise Exception("Could not download file from '{}': "
+                                "{}".format(url, e))
 
     return tuple(file_paths)
 
@@ -130,7 +163,7 @@ def import_split_image(manifest, alias):
 
 
 def import_image(manifest, alias):
-    '''
+    """
     There are 2 possible image formats: unified and split. We support both.
 
     For unified format, the manifest will look like this:
@@ -149,7 +182,7 @@ def import_image(manifest, alias):
         "metadata-object": "centos7.5/meta-22abbefe0c68943f264a7139c7a699a0b2adfbcf46fc661d2e89b1232301a5de.tar.xz",
         "rootfs-object": "centos7.5/22abbefe0c68943f264a7139c7a699a0b2adfbcf46fc661d2e89b1232301a5de.squashfs"
     }
-    '''
+    """
 
     if manifest["tarball_type"] not in TARBALL_TYPES:
         raise Exception("Invalid tarball type: {}".format(
