@@ -15,6 +15,8 @@
     - sudo
     - man
     - vim
+    - wget
+    - tree
   when: ansible_os_family == 'RedHat'
 
 - name: apt install anticipated packages for building/running swift
@@ -33,6 +35,8 @@
     - libxslt1-dev
     - man
     - vim
+    - wget
+    - tree
   when: ansible_os_family == 'Debian'
 
 - name: delete ubuntu user
