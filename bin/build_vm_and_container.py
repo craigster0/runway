@@ -1,8 +1,10 @@
 #!/usr/bin/env python
 
 import argparse
+import datetime
 import os
 import sys
+import time
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__),
                                                 '..')))
 
@@ -56,7 +58,27 @@ def vol_size_in_mebibytes(size_str):
         return int(size_str[:-1]) / 1024 / 1024
 
 
+def elapsed_time_string(sec_elapsed):
+    rounded_seconds = int(round(sec_elapsed))
+    h = int(rounded_seconds / (60 * 60))
+    m = int((rounded_seconds % (60 * 60)) / 60)
+    s = rounded_seconds % 60
+    if h > 0:
+        return "{} hour{}, {} minute{}, {} second{}".format(
+            h, "" if h == 1 else "s",
+            m, "" if m == 1 else "s",
+            s, "" if s == 1 else "s")
+    elif m > 0:
+        return "{} minute{}, {} second{}".format(
+            m, "" if m == 1 else "s",
+            s, "" if s == 1 else "s")
+    else:
+        return "{} second{}".format(s, "" if s == 1 else "s")
+
+
 if __name__ == "__main__":
+    start_time = time.time()
+
     parser = argparse.ArgumentParser()
     parser.add_argument('-c', '--container-name', default=None,
                         help="Container name. Default: the name of the "
@@ -125,9 +147,13 @@ if __name__ == "__main__":
     except Exception as e:
         exit_on_error(e.message)
 
+    elapsed_time = time.time() - start_time
+
     # Log into our brand new container?
     colorprint.success(
-        "Your new container is now up and running! If you want to log into "
-        "it, just run the following command from the runway directory:\n\n"
+        "Your new container is now up and running (after {})! If you want to "
+        "log into it, just run the following command from the runway "
+        "directory:\n\n"
         "\tbin/bash_on_current_container.sh {}".format(
+            elapsed_time_string(elapsed_time),
             workspace_name if container_name is None else container_name))
