@@ -14,6 +14,7 @@ Vagrant.configure(2) do |config|
     vb.name = "Runway"
     vb.cpus = Integer(ENV['VAGRANT_CPUS'] || 2)
     vb.memory = Integer(ENV['VAGRANT_RAM'] || 6144)
+    vb.customize ["modifyvm", :id, "--audio", "none"]
 
     # Disk management
     controller_name = (ENV['CONTROLLER_NAME'] || "SCSI")
