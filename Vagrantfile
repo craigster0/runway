@@ -16,8 +16,12 @@ Vagrant.configure(2) do |config|
     vb.memory = Integer(ENV['VAGRANT_RAM'] || 6144)
     vb.customize ["modifyvm", :id, "--audio", "none"]
 
+    line = `vboxmanage list systemproperties | grep "Default machine folder"`
+    vb_machine_folder = line.split(':')[1].strip()
+
     # Disk management
     controller_name = (ENV['CONTROLLER_NAME'] || "SCSI")
+    vm_root_disk_size = (ENV['VM_ROOT_DISK_SIZE'] || 20480)
     file_to_disk = File.join(File.dirname(File.expand_path(__FILE__)), "SwiftDisk.vmdk")
     unless File.exist?(file_to_disk)
       # We want to allow 2 equal containers to be created within the same VM
@@ -35,7 +39,16 @@ Vagrant.configure(2) do |config|
       vmdk_size = (vmdk_size * 1024 * 1024) / 1000000
       vb.customize [ "createmedium", "disk", "--filename", file_to_disk, "--format", "vmdk", "--size", vmdk_size ]
     end
-    vb.customize [ "storageattach", :id , "--storagectl", controller_name, "--port", 2, "--device", 0, "--type", "hdd", "--medium", file_to_disk]
+    vb.customize [ "storageattach", :id, "--storagectl", controller_name, "--port", 2, "--device", 0, "--type", "hdd", "--medium", file_to_disk ]
+
+    # Resize the root disk
+    root_vmdk_disk = File.join(vb_machine_folder, vb.name, "ubuntu-bionic-18.04-cloudimg.vmdk")
+    root_vdi_disk = File.join(vb_machine_folder, vb.name, "ubuntu-bionic-18.04-cloudimg.vdi")
+
+    vb.customize [ "clonemedium", "disk", "--format", "VDI", root_vmdk_disk, root_vdi_disk ]
+    vb.customize [ "modifymedium", "disk", "--resize", vm_root_disk_size, root_vdi_disk ]
+    vb.customize [ "storageattach", :id, "--storagectl", controller_name, "--port", 0, "--device", 0, "--medium", root_vdi_disk ]
+    vb.customize [ "closemedium", "disk", root_vmdk_disk, "--delete" ]
   end
 
   # Bootstrapping
