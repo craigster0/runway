@@ -45,10 +45,12 @@ Vagrant.configure(2) do |config|
     root_vmdk_disk = File.join(vb_machine_folder, vb.name, "ubuntu-bionic-18.04-cloudimg.vmdk")
     root_vdi_disk = File.join(vb_machine_folder, vb.name, "ubuntu-bionic-18.04-cloudimg.vdi")
 
-    vb.customize [ "clonemedium", "disk", "--format", "VDI", root_vmdk_disk, root_vdi_disk ]
-    vb.customize [ "modifymedium", "disk", "--resize", vm_root_disk_size, root_vdi_disk ]
-    vb.customize [ "storageattach", :id, "--storagectl", controller_name, "--port", 0, "--device", 0, "--medium", root_vdi_disk ]
-    vb.customize [ "closemedium", "disk", root_vmdk_disk, "--delete" ]
+    unless File.exist?(root_vdi_disk)
+      vb.customize [ "clonemedium", "disk", "--format", "VDI", root_vmdk_disk, root_vdi_disk ]
+      vb.customize [ "modifymedium", "disk", "--resize", vm_root_disk_size, root_vdi_disk ]
+      vb.customize [ "storageattach", :id, "--storagectl", controller_name, "--port", 0, "--device", 0, "--medium", root_vdi_disk ]
+      vb.customize [ "closemedium", "disk", root_vmdk_disk, "--delete" ]
+    end
   end
 
   # Bootstrapping
