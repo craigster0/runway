@@ -29,6 +29,7 @@ def native_string(s):
         return s
     return s.decode('utf-8')
 
+
 def print_and_log(text, logfile_path):
     print(text)
     log(text, logfile_path)
