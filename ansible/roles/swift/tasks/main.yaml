@@ -1,9 +1,9 @@
 # install swift
 ---
 - name: install sudo
-  yum: name={{item}} state=installed
-  with_items:
-    - sudo
+  yum:
+    name: ['sudo']
+    state: installed
   when: ansible_os_family == 'RedHat'
 
 - name: Create etc swift
@@ -29,19 +29,19 @@
 # TODO: Remove this and the patch file once it's fixed.
 
 - name: yum install patch
-  yum: name={{ item }} state=present
+  yum:
+    name: ['patch']
+    state: present
   become: yes
   become_user: root
-  with_items:
-    - patch
   when: ansible_os_family == 'RedHat'
 
 - name: apt install patch
-  apt: name={{ item }} state=present
+  apt:
+    name: ['patch']
+    state: present
   become: yes
   become_user: root
-  with_items:
-    - patch
   when: ansible_os_family == 'Debian'
 
 - name: apply patch to file
@@ -190,40 +190,16 @@
 
 - name: install dependencies
   register: swiftdependenciesinstalled
-  apt: name={{item}} state=installed
-  with_items:
-    - curl
-    - gcc
-    - memcached
-    # - rsync
-    - sqlite3
-    # - xfsprogs
-    # - git-core
-    # - libffi-dev
-    # - python-setuptools
-    # - libssl-dev
-    # - python-coverage
-    # - python-dev
-    # - python-nose
-    # - python-xattr
-    # - python-eventlet
-    # - python-greenlet
-    # - python-pastedeploy
-    # - python-netifaces
-    # - python-pip
-    # - python-dnspython
-    # mock should be installed with pip instead. apt version is too old
-    # - python-mock
+  apt:
+    name: ['curl', 'gcc', 'memcached', 'sqlite3']
+    state: installed
   when: ansible_os_family == 'Debian'
 
 - name: install dependencies
   register: swiftdependenciesinstalled
-  yum: name={{item}} state=installed
-  with_items:
-    - curl
-    - gcc
-    - memcached
-    - sqlite
+  yum:
+    name: ['curl', 'gcc', 'memcached', 'sqlite']
+    state: installed
   when: ansible_os_family == 'RedHat'
 
 - name: update pip
@@ -244,12 +220,6 @@
   with_items:
     - requirements.txt
     - test-requirements.txt
-
-# TODO: remove this as soon as a new version of eventlet is released
-- name: Skip faulty version of eventlet (0.23.0)
-  pip:
-    name: eventlet!=0.23.0
-    state: present
 
 - name: Install swift
   register: swiftinstalled

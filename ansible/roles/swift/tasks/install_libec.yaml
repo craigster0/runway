@@ -13,23 +13,16 @@
 - name: Libec - install build tools (Debian)
   when: libec_stat.stat.exists and libec_stat.stat.isdir and ansible_os_family == 'Debian'
   register: build_tools_installed
-  apt: name={{item}} state=installed
-  with_items:
-    - build-essential
-    - autoconf
-    - automake
-    - libtool
+  apt:
+    name: ['build-essential', 'autoconf', 'automake', 'libtool']
+    state: installed
 
 - name: Libec - install build tools (RedHat)
   when: libec_stat.stat.exists and libec_stat.stat.isdir and ansible_os_family == 'RedHat'
   register: build_tools_installed
-  yum: name={{item}} state=installed
-  with_items:
-    - gcc
-    - make
-    - autoconf
-    - automake
-    - libtool
+  yum:
+    name: ['gcc', 'make', 'autoconf', 'automake', 'libtool']
+    state: installed
 
 - name: Libec - install from source
   when: libec_stat.stat.exists and libec_stat.stat.isdir and build_tools_installed is success

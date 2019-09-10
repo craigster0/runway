@@ -46,5 +46,4 @@ fi
 $installer install -y $PACKAGELIST
 
 pip install --upgrade pip==9.0.3
-# Ansible 2.5.0 has a bug that breaks pip extension, so we're pinning
-pip install ansible==2.4.3.0
+pip install ansible
