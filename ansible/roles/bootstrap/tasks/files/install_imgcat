@@ -1,0 +1,7 @@
+#!/bin/bash
+
+set -e
+
+wget https://www.iterm2.com/utilities/imgcat -O /usr/bin/imgcat
+chmod +x /usr/bin/imgcat
+exec rm -rf /usr/bin/install_imgcat

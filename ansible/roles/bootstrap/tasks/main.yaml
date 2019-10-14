@@ -125,3 +125,12 @@
     owner: swift
     group: swift
     path: "{{ item.mount_point }}"
+
+- name: Install imgcat installer
+  copy:
+    src: install_imgcat
+    dest: /usr/bin/install_imgcat
+    owner: root
+    group: root
+    mode: '0755'
+  become: true
