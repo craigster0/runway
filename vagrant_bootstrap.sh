@@ -13,3 +13,8 @@ lxc list > /dev/null
 sudo -H -u ubuntu bash -c 'lxc list > /dev/null'
 sudo -H -u vagrant bash -c 'lxc list > /dev/null'
 apt-get install linux-generic -y
+
+# Prepare the system to enable core dumps in the container, although core
+# dumps will not be enabled by default
+echo 0 > /proc/sys/kernel/core_uses_pid
+echo "/tmp/%e-%t-%s-%p.core" > /proc/sys/kernel/core_pattern
