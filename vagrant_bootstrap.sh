@@ -16,5 +16,5 @@ apt-get install linux-generic -y
 
 # Prepare the system to enable core dumps in the container, although core
 # dumps will not be enabled by default
-echo 0 > /proc/sys/kernel/core_uses_pid
-echo "/tmp/%e-%t-%s-%p.core" > /proc/sys/kernel/core_pattern
+sysctl kernel.core_uses_pid=0
+sysctl kernel.core_pattern=/tmp/%e-%t-%s-%p.core
