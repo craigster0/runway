@@ -22,6 +22,7 @@ sysctl --system
 
 # It looks like there's been a bug in Ubuntu since (at least) 2006 that prevents
 # from properly loading the above settings, so we have to reload them at start up
+# https://bugs.launchpad.net/ubuntu/+source/procps/+bug/50093
 cat > /etc/cron.d/reload-sysctl << EOF
 SHELL=/bin/bash
 @reboot root /bin/sleep 5 && /sbin/sysctl --system
