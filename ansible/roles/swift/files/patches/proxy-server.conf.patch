@@ -1,23 +1,12 @@
 diff --git a/doc/saio/swift/proxy-server.conf b/doc/saio/swift/proxy-server.conf
-index c656e3aea..ffd76f163 100644
+index 935256140..37d6845a4 100644
 --- a/doc/saio/swift/proxy-server.conf
 +++ b/doc/saio/swift/proxy-server.conf
-@@ -39,6 +39,7 @@ use = egg:swift#slo
- use = egg:swift#container_sync
- current = //saio/saio_endpoint
+@@ -61,6 +61,7 @@ use = egg:swift#container_quotas
  
-+# To enable, add the s3api middleware to the pipeline before tempauth
- [filter:s3api]
- use = egg:swift#s3api
- # Add this filter to your pipeline if you want to test with the S3 protocol.
-@@ -85,10 +86,6 @@ use = egg:swift#listing_formats
- [filter:symlink]
- use = egg:swift#symlink
+ [filter:cache]
+ use = egg:swift#memcache
++memcache_max_connections = 1024
  
--# To enable, add the s3api middleware to the pipeline before tempauth
--[filter:s3api]
--use = egg:swift#s3api
--
- # Example to create root secret: `openssl rand -base64 32`
- [filter:keymaster]
- use = egg:swift#keymaster
+ [filter:gatekeeper]
+ use = egg:swift#gatekeeper
