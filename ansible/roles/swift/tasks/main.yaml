@@ -212,6 +212,18 @@
     name: setuptools
     state: latest
 
+# TODO: remove this once the situation with python-openstackclient is fixed.
+# The problem is that starting with version 5.0.0, python-openstackclient
+# doesn't support Python 2. There's 2 possible solutions IMHO: get rid of
+# python-openstackclient altogether or require a version lower than 5.0.0. But
+# that should be done upstream Swift. Until then, we're just getting rid of
+# that line on our own.
+- name: Remove python-openstackclient dependency from test-requirements.txt
+  lineinfile:
+    path: /home/swift/code/swift/test-requirements.txt
+    state: absent
+    regexp: '^python-openstackclient'
+
 - name: install pip dependencies
   pip:
     requirements: "{{item}}"
