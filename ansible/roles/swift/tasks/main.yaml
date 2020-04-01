@@ -224,6 +224,18 @@
     state: absent
     regexp: '^python-openstackclient'
 
+# TODO: remove this once the situation with os-testr is fixed.
+# The problem is that starting with version 3.0.0, stestr
+# doesn't support Python 2. stestr is a dependency of os-testr, which we don't
+# control, so for now we're just manually installing stestr BEFORE os-testr, so
+# that PIP doesn't try to install a version which is too new.
+- name: Force stestr older than 3.0.0 to be installed before os-testr
+  lineinfile:
+    path: /home/swift/code/swift/test-requirements.txt
+    line: stestr<3.0.0
+    state: present
+    insertbefore: '^os-testr'
+
 - name: install pip dependencies
   pip:
     requirements: "{{item}}"
