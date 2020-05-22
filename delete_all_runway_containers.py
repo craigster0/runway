@@ -8,10 +8,15 @@ do lxc list --format=json swift-runway
 while it would be cool if this worked, it doesn't and the docs are bad
 https://linuxcontainers.org/lxc/documentation/#python
 import lxc
+
 for defined in (True, False):
     for active in (True, False):
         x = lxc.list_containers(active=active, defined=defined)
-        print(x, f"=> lxc.list_containers(active={active}, defined={defined})")
+        print(
+            x,
+            "=> lxc.list_containers(active=%s, defined=%s)"
+            % (active, defined),
+        )
 """
 
 import argparse
@@ -49,7 +54,8 @@ parser.add_argument(
     "-p",
     "--prefix",
     default=None,
-    help=f"Prefix to look for when deleting. Default: '{DEFAULT_PREFIX}'",
+    help="Prefix to look for when deleting. Default: "
+    "'{}'".format(DEFAULT_PREFIX),
 )
 
 args = parser.parse_args()
@@ -71,10 +77,10 @@ containers = json.loads(p.stdout.decode())
 to_delete = [x["name"] for x in containers if x["name"].startswith(prefix)]
 
 if to_delete:
-    delete_command = f"lxc delete --force {' '.join(to_delete)}"
+    delete_command = "lxc delete --force %s" % " ".join(to_delete)
     print(delete_command)
     p = subprocess.run(shlex.split(delete_command))
-    print(f"{len(to_delete)} containers deleted")
+    print("%d containers deleted" % len(to_delete))
 else:
     print("No containers to delete")
 
@@ -82,16 +88,16 @@ else:
 try:
 
     if prefix_was_provided:
-        lvlist = glob.glob(f"/dev/{VOLUME_GROUP}/{prefix}*")
+        lvlist = glob.glob("/dev/%s/%s*" % (VOLUME_GROUP, prefix))
     else:
         # We'll delete all the lvm volumes if a prefix was not provided
-        lvlist = glob.glob(f"/dev/{VOLUME_GROUP}/*")
+        lvlist = glob.glob("/dev/%s/*" % VOLUME_GROUP)
 except FileNotFoundError:
     print("No volumes to delete")
 else:
     num_deleted = 0
     for logical_volume in lvlist:
-        delete_command = f"lvremove -f {logical_volume}"
+        delete_command = "lvremove --force %s" % logical_volume
         print(delete_command)
         try:
             p = subprocess.run(
@@ -103,13 +109,14 @@ else:
             )
         except subprocess.CalledProcessError as err:
             print(
-                f"Error deleting {logical_volume}:\n{err.stderr.rstrip()}",
+                "Error deleting %s:\n%s"
+                % (logical_volume, err.stderr.rstrip()),
                 file=sys.stderr,
             )
         else:
             num_deleted += 1
     else:
-        print(f"{num_deleted} volumes deleted")
+        print("%d volumes deleted" % num_deleted)
 
 # delete associated lxc profiles
 profile_list_command = "lxc profile list"
@@ -125,10 +132,10 @@ for line in p.stdout.decode().split("\n"):
         pass
 if to_delete:
     for profile in to_delete:
-        delete_command = f"lxc profile delete {profile}"
+        delete_command = "lxc profile delete %s" % profile
         print(delete_command)
         p = subprocess.run(shlex.split(delete_command))
-    print(f"{len(to_delete)} profiles deleted")
+    print("%d profiles deleted" % len(to_delete))
 else:
     print("No profiles to delete")
 
@@ -154,8 +161,8 @@ for line in p.stdout.decode().split("\n"):
         if delete_everything or (alias != "" and alias.startswith(prefix)):
             images_to_delete.append(fingerprint)
 if images_to_delete:
-    print(f"Deleting {len(images_to_delete)} images")
-    image_delete_command = f"lxc image delete {' '.join(images_to_delete)}"
+    print("Deleting %d images" % len(images_to_delete))
+    image_delete_command = "lxc image delete %s" % " ".join(images_to_delete)
     print(image_delete_command)
     p = subprocess.run(shlex.split(image_delete_command))
 else:
