@@ -46,6 +46,11 @@ def warning(text, logfile_path=None):
     log(text, logfile_path)
 
 
+def normal(text, logfile_path=None):
+    print(text)
+    log(text, logfile_path)
+
+
 def log(text, logfile_path):
     if logfile_path is not None:
         with open(logfile_path, "a") as logfile:
