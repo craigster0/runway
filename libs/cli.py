@@ -9,25 +9,25 @@ from subprocess import CalledProcessError
 
 def extract_env_vars(cmd):
     env_vars = {}
-    matches = re.split('(\S+=\S+) ', cmd)
+    matches = re.split("(\S+=\S+) ", cmd)
     remaining_matches = list(matches)
     for match in matches:
         stripped_match = match.strip()
-        if stripped_match != '':
-            if match.find(' ') > -1 or match.find('=') < 0:
+        if stripped_match != "":
+            if match.find(" ") > -1 or match.find("=") < 0:
                 break
             else:
-                split_match = stripped_match.split('=')
+                split_match = stripped_match.split("=")
                 env_vars[split_match[0]] = split_match[1]
         remaining_matches.pop(0)
-    remainder = ''.join(remaining_matches)
+    remainder = "".join(remaining_matches)
     return env_vars if len(env_vars) > 0 else None, remainder
 
 
 def native_string(s):
     if sys.version_info[0] < 3:
         return s
-    return s.decode('utf-8')
+    return s.decode("utf-8")
 
 
 def print_and_log(text, logfile_path):
@@ -38,8 +38,11 @@ def print_and_log(text, logfile_path):
 def log(text, logfile_path):
     if logfile_path is not None:
         with open(logfile_path, "a") as logfile:
-            logfile.write("[{}] {}\n".format(
-                datetime.datetime.now().strftime("%F %H:%M:%S"), text))
+            logfile.write(
+                "[{}] {}\n".format(
+                    datetime.datetime.now().strftime("%F %H:%M:%S"), text
+                )
+            )
 
 
 def print_remaining_process_output(p, logfile_path=None):
@@ -67,13 +70,15 @@ def run_command(cmd, cwd=None, logfile_path=None, shell=False, env=None):
     print_and_log("$ {}".format(parsed_cmd), logfile_path)
     p = None
     try:
-        p = subprocess.Popen(parsed_cmd,
-                             stdout=subprocess.PIPE,
-                             stderr=subprocess.STDOUT,
-                             cwd=cwd,
-                             env=envs_for_popen,
-                             bufsize=1,
-                             shell=shell)
+        p = subprocess.Popen(
+            parsed_cmd,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.STDOUT,
+            cwd=cwd,
+            env=envs_for_popen,
+            bufsize=1,
+            shell=shell,
+        )
         while p.poll() is None:
             # This blocks until it receives a newline:
             line = native_string(p.stdout.readline())
@@ -85,13 +90,16 @@ def run_command(cmd, cwd=None, logfile_path=None, shell=False, env=None):
                 "Command '{}' responded with a non-zero exit status ({}).\n"
                 "An error for this command might have been printed above "
                 "these lines. Please read the output in order to check what "
-                "went wrong.".format(parsed_cmd, exit_code), logfile_path)
+                "went wrong.".format(parsed_cmd, exit_code),
+                logfile_path,
+            )
     except CalledProcessError as e:
         if p:
             print_remaining_process_output(p, logfile_path=logfile_path)
         raise LoggedException(
             "Error running '{}':\n{}\n{}".format(parsed_cmd, e.output, str(e)),
-            logfile_path)
+            logfile_path,
+        )
     except LoggedException:
         if p:
             print_remaining_process_output(p, logfile_path=logfile_path)
@@ -99,8 +107,9 @@ def run_command(cmd, cwd=None, logfile_path=None, shell=False, env=None):
     except Exception as e:
         if p:
             print_remaining_process_output(p, logfile_path=logfile_path)
-        raise LoggedException("Error running '{}':\n{}".format(cmd, str(e)),
-                              logfile_path)
+        raise LoggedException(
+            "Error running '{}':\n{}".format(cmd, str(e)), logfile_path
+        )
 
 
 class LoggedException(Exception):

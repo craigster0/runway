@@ -1,12 +1,11 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 
 import argparse
-import datetime
 import os
 import sys
 import time
-sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__),
-                                                '..')))
+
+sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 
 from libs import colorprint
 from libs import workspaces
@@ -14,18 +13,19 @@ from libs.cli import run_command
 from libs.manifest import Manifest
 
 SCRIPT_DIR = os.path.abspath(os.path.dirname(__file__))
-RUNWAY_DIR = os.path.abspath(os.path.join(SCRIPT_DIR, '..'))
-BIN_DIR = os.path.abspath(os.path.join(RUNWAY_DIR, 'bin'))
-SETUP_WORKSPACE_SCRIPT = 'setup_guest_workspace.py'
+RUNWAY_DIR = os.path.abspath(os.path.join(SCRIPT_DIR, ".."))
+BIN_DIR = os.path.abspath(os.path.join(RUNWAY_DIR, "bin"))
+SETUP_WORKSPACE_SCRIPT = "setup_guest_workspace.py"
 VAGRANT_BOX_NAME = "ubuntu/bionic64"
 DEFAULT_CONTAINER_DISTRO = "ss-centos7.5"
 
 
 def exit_on_error(error_text):
     colorprint.error(error_text)
-    colorprint.error("\nIf you want to cleanup your runway installation, run "
-                     "'{}'".format(os.path.join(RUNWAY_DIR, 'bin',
-                                                'cleanup_runway.sh')))
+    colorprint.error(
+        "\nIf you want to cleanup your runway installation, run "
+        "'{}'".format(os.path.join(RUNWAY_DIR, "bin", "cleanup_runway.sh"))
+    )
     sys.exit(1)
 
 
@@ -65,13 +65,12 @@ def elapsed_time_string(sec_elapsed):
     s = rounded_seconds % 60
     if h > 0:
         return "{} hour{}, {} minute{}, {} second{}".format(
-            h, "" if h == 1 else "s",
-            m, "" if m == 1 else "s",
-            s, "" if s == 1 else "s")
+            h, "" if h == 1 else "s", m, "" if m == 1 else "s", s, "" if s == 1 else "s"
+        )
     elif m > 0:
         return "{} minute{}, {} second{}".format(
-            m, "" if m == 1 else "s",
-            s, "" if s == 1 else "s")
+            m, "" if m == 1 else "s", s, "" if s == 1 else "s"
+        )
     else:
         return "{} second{}".format(s, "" if s == 1 else "s")
 
@@ -80,24 +79,35 @@ if __name__ == "__main__":
     start_time = time.time()
 
     parser = argparse.ArgumentParser()
-    parser.add_argument('-c', '--container-name', default=None,
-                        help="Container name. Default: the name of the "
-                             "workspace")
-    parser.add_argument('-d', '--distro', default=DEFAULT_CONTAINER_DISTRO,
-                        help="Container distro (not the VM's). Default: "
-                             "{}".format(DEFAULT_CONTAINER_DISTRO))
-    parser.add_argument('-m', '--manifest', default=None,
-                        help="Path to manifest file. Run '{}/{} -h' to check "
-                             "the default manifest "
-                             "file.".format(BIN_DIR, SETUP_WORKSPACE_SCRIPT))
-    parser.add_argument('-w', '--workspace', default=None,
-                        help="Workspace name")
+    parser.add_argument(
+        "-c",
+        "--container-name",
+        default=None,
+        help="Container name. Default: the name of the workspace",
+    )
+    parser.add_argument(
+        "-d",
+        "--distro",
+        default=DEFAULT_CONTAINER_DISTRO,
+        help="Container distro (not the VM's). Default: "
+        "{}".format(DEFAULT_CONTAINER_DISTRO),
+    )
+    parser.add_argument(
+        "-m",
+        "--manifest",
+        default=None,
+        help="Path to manifest file. Run '{}/{} -h' to check "
+        "the default manifest "
+        "file.".format(BIN_DIR, SETUP_WORKSPACE_SCRIPT),
+    )
+    parser.add_argument("-w", "--workspace", default=None, help="Workspace name")
 
     args = parser.parse_args()
     container_name = args.container_name
     distro = args.distro
-    manifest_file = os.path.abspath(args.manifest) \
-        if args.manifest is not None else None
+    manifest_file = (
+        os.path.abspath(args.manifest) if args.manifest is not None else None
+    )
     workspace_name = args.workspace
 
     # Setup workspace
@@ -118,18 +128,20 @@ if __name__ == "__main__":
     manifest = get_manifest(workspace_name)
 
     vol_size = manifest.get_config_option("drive_size")
-    vol_count = int(manifest.get_config_option('drive_count'))
+    vol_count = int(manifest.get_config_option("drive_count"))
 
     # Vagrant up
-    if os.environ.get('CONTROLLER_NAME') is None:
-        colorprint.warning("WARNING: CONTROLLER_NAME env var hasn't been set. "
-                           "If you fail to 'vagrant up' your VM, open "
-                           "VirtualBox, check the name of your SCSI "
-                           "Controller and provide it in the CONTROLLER_NAME "
-                           "env var.")
+    if os.environ.get("CONTROLLER_NAME") is None:
+        colorprint.warning(
+            "WARNING: CONTROLLER_NAME env var hasn't been set. "
+            "If you fail to 'vagrant up' your VM, open "
+            "VirtualBox, check the name of your SCSI "
+            "Controller and provide it in the CONTROLLER_NAME "
+            "env var."
+        )
     vagrant_env_vars = {
-        'VOL_SIZE': "{}".format(vol_size_in_mebibytes(vol_size)),
-        'VOL_COUNT': "{}".format(vol_count),
+        "VOL_SIZE": "{}".format(vol_size_in_mebibytes(vol_size)),
+        "VOL_COUNT": "{}".format(vol_count),
     }
     try:
         run_command("vagrant up", cwd=RUNWAY_DIR, env=vagrant_env_vars)
@@ -139,8 +151,7 @@ if __name__ == "__main__":
         colorprint.info("Creating container...")
         create_container_cmd = "./create_container.sh -d {}".format(distro)
         if container_name is not None:
-            create_container_cmd += " --container-name {}".format(
-                container_name)
+            create_container_cmd += " --container-name {}".format(container_name)
         if provided_workspace_name:
             create_container_cmd += " --workspace {}".format(workspace_name)
         run_command(create_container_cmd, cwd=BIN_DIR)
@@ -156,4 +167,6 @@ if __name__ == "__main__":
         "directory:\n\n"
         "\tbin/bash_on_current_container.sh {}".format(
             elapsed_time_string(elapsed_time),
-            workspace_name if container_name is None else container_name))
+            workspace_name if container_name is None else container_name,
+        )
+    )

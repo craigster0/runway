@@ -16,10 +16,10 @@ SCRIPT_DIR = os.path.abspath(os.path.dirname(__file__))
 #   ...later we'll figure out how to make this dynamic
 VG_NAME = "swift-runway-vg01"
 SWIFTSTACK_IMAGES_PREFIX = "ss-"
-SWIFTSTACK_IMAGES_BASE_URL = \
-    "https://tellus.swiftstack.com/v1/AUTH_runway/lxd-images"
-BACKUP_SWIFTSTACK_IMAGES_BASE_URL = \
+SWIFTSTACK_IMAGES_BASE_URL = "https://tellus.swiftstack.com/v1/AUTH_runway/lxd-images"
+BACKUP_SWIFTSTACK_IMAGES_BASE_URL = (
     "https://cloud.swiftstack.com/v1/AUTH_runway/lxd-images"
+)
 IMAGE_MANIFEST_OBJECT_NAME = "manifest.json"
 UNIFIED_TARBALL_TYPE = "unified"
 SPLIT_TARBALL_TYPE = "split"
@@ -48,8 +48,9 @@ def get_image_manifest(swift_container_name, use_backup_url=False):
     else:
         base_url = SWIFTSTACK_IMAGES_BASE_URL
 
-    manifest_obj_url = "{}/{}/{}".format(base_url, swift_container_name,
-                                         IMAGE_MANIFEST_OBJECT_NAME)
+    manifest_obj_url = "{}/{}/{}".format(
+        base_url, swift_container_name, IMAGE_MANIFEST_OBJECT_NAME
+    )
 
     try:
         r = requests.get(manifest_obj_url)
@@ -57,18 +58,21 @@ def get_image_manifest(swift_container_name, use_backup_url=False):
         return r.json()
     except Exception as e:
         if not use_backup_url:
-            print("Could not download container image manifest from its "
-                  "primary location. Retrying with backup location...")
+            print(
+                "Could not download container image manifest from its "
+                "primary location. Retrying with backup location..."
+            )
             return get_image_manifest(swift_container_name, True)
         else:
-            raise Exception("Could not download container image manifest from "
-                            "'{}'.\n{}".format(manifest_obj_url, e))
+            raise Exception(
+                "Could not download container image manifest from "
+                "'{}'.\n{}".format(manifest_obj_url, e)
+            )
 
 
 def is_image_already_imported(fingerprint):
     try:
-        run_command("lxc image info {} >/dev/null 2>&1".format(fingerprint),
-                    shell=True)
+        run_command("lxc image info {} >/dev/null 2>&1".format(fingerprint), shell=True)
     except Exception:
         return False
     return True
@@ -87,8 +91,7 @@ def download_unified_image_file(manifest, use_backup_url=False):
     else:
         base_url = SWIFTSTACK_IMAGES_BASE_URL
 
-    tarball_url = "{}/{}".format(base_url,
-                                 manifest["tarball-object"])
+    tarball_url = "{}/{}".format(base_url, manifest["tarball-object"])
 
     try:
         r = requests.get(tarball_url, stream=True)
@@ -100,12 +103,15 @@ def download_unified_image_file(manifest, use_backup_url=False):
                     f.write(chunk)
     except Exception as e:
         if not use_backup_url:
-            print("Could not download unified image from its primary "
-                  "location. Retrying with backup location...")
+            print(
+                "Could not download unified image from its primary "
+                "location. Retrying with backup location..."
+            )
             return download_unified_image_file(manifest, True)
         else:
-            raise Exception("Could not download file from '{}': "
-                            "{}".format(tarball_url, e))
+            raise Exception(
+                "Could not download file from '{}': {}".format(tarball_url, e)
+            )
 
     return file_path
 
@@ -124,10 +130,8 @@ def download_split_image_files(manifest, use_backup_url=False):
     else:
         base_url = SWIFTSTACK_IMAGES_BASE_URL
 
-    metadata_tarball_url = "{}/{}".format(base_url,
-                                          manifest["metadata-object"])
-    rootfs_tarball_url = "{}/{}".format(base_url,
-                                        manifest["rootfs-object"])
+    metadata_tarball_url = "{}/{}".format(base_url, manifest["metadata-object"])
+    rootfs_tarball_url = "{}/{}".format(base_url, manifest["rootfs-object"])
     file_paths = []
 
     for url in [metadata_tarball_url, rootfs_tarball_url]:
@@ -141,23 +145,28 @@ def download_split_image_files(manifest, use_backup_url=False):
                         f.write(chunk)
         except Exception as e:
             if not use_backup_url:
-                print("Could not download split image from its primary "
-                      "location. Retrying with backup location...")
+                print(
+                    "Could not download split image from its primary "
+                    "location. Retrying with backup location..."
+                )
                 return download_split_image_files(manifest, True)
             else:
-                raise Exception("Could not download file from '{}': "
-                                "{}".format(url, e))
+                raise Exception(
+                    "Could not download file from '{}': {}".format(url, e)
+                )
 
     return tuple(file_paths)
 
 
 def import_split_image(manifest, alias):
-    metadata_tarball_path, rootfs_tarball_path = \
-        download_split_image_files(manifest)
+    metadata_tarball_path, rootfs_tarball_path = download_split_image_files(manifest)
     # There might be an older image with the same alias
     delete_image_with_alias(alias)
-    run_command("lxc image import {} {} --alias {}".format(
-        metadata_tarball_path, rootfs_tarball_path, alias))
+    run_command(
+        "lxc image import {} {} --alias {}".format(
+            metadata_tarball_path, rootfs_tarball_path, alias
+        )
+    )
     os.unlink(metadata_tarball_path)
     os.unlink(rootfs_tarball_path)
 
@@ -185,23 +194,23 @@ def import_image(manifest, alias):
     """
 
     if manifest["tarball_type"] not in TARBALL_TYPES:
-        raise Exception("Invalid tarball type: {}".format(
-            manifest["tarball_type"]))
+        raise Exception("Invalid tarball type: {}".format(manifest["tarball_type"]))
     elif manifest["tarball_type"] == UNIFIED_TARBALL_TYPE:
         import_unified_image(manifest, alias)
     elif manifest["tarball_type"] == SPLIT_TARBALL_TYPE:
         import_split_image(manifest, alias)
     else:
-        raise Exception("Tarball type '{}' is valid, but a method to import "
-                        "it has not been implemented yet.")
+        raise Exception(
+            "Tarball type '{}' is valid, but a method to import "
+            "it has not been implemented yet."
+        )
 
 
 def import_image_if_needed(base_image):
     if not is_swiftstack_hosted_image(base_image):
-        raise Exception("{} is not an image hosted by "
-                        "SwiftStack".format(base_image))
+        raise Exception("{} is not an image hosted by SwiftStack".format(base_image))
 
-    swift_container_name = base_image[len(SWIFTSTACK_IMAGES_PREFIX):]
+    swift_container_name = base_image[len(SWIFTSTACK_IMAGES_PREFIX) :]
     manifest = get_image_manifest(swift_container_name)
     if not is_image_already_imported(manifest["fingerprint"]):
         print("Importing image '{}'...".format(base_image))
@@ -212,14 +221,16 @@ def import_image_if_needed(base_image):
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
-    parser.add_argument('distro', type=str, help='Container distro')
-    parser.add_argument('cname', metavar='containername', help='Container '
-                                                               'name')
-    parser.add_argument('volsize', help='Volume size')
-    parser.add_argument('volcount', type=int, help='Volume count')
-    parser.add_argument('baseimage', nargs='?',
-                        help='Base image. Defaults: \'images:centos/7/amd64\' '
-                             'for RHEL distro, \'ubuntu:16.04\' otherwise')
+    parser.add_argument("distro", type=str, help="Container distro")
+    parser.add_argument("cname", metavar="containername", help="Container name")
+    parser.add_argument("volsize", help="Volume size")
+    parser.add_argument("volcount", type=int, help="Volume count")
+    parser.add_argument(
+        "baseimage",
+        nargs="?",
+        help="Base image. Defaults: 'images:centos/7/amd64' "
+        "for RHEL distro, 'ubuntu:16.04' otherwise",
+    )
 
     args = parser.parse_args()
     distro = args.distro
@@ -240,24 +251,36 @@ if __name__ == "__main__":
     try:
         # make a container profile that maps 8 block devices to the guest
         rand_file_name = str(uuid.UUID(int=random.getrandbits(128)))
-        run_command("./make_lxc_profile.py {} {} {} {} > "
-                    "/tmp/{}".format(container_name, VG_NAME, volume_size,
-                                     volume_count, rand_file_name),
-                    cwd=SCRIPT_DIR, shell=True)
+        run_command(
+            "./make_lxc_profile.py {} {} {} {} > "
+            "/tmp/{}".format(
+                container_name, VG_NAME, volume_size, volume_count, rand_file_name
+            ),
+            cwd=SCRIPT_DIR,
+            shell=True,
+        )
         run_command("lxc profile create {}-profile".format(container_name))
-        run_command("cat /tmp/{} | lxc profile edit {}-profile".format(
-            rand_file_name, container_name), cwd=SCRIPT_DIR, shell=True)
+        run_command(
+            "cat /tmp/{} | lxc profile edit {}-profile".format(
+                rand_file_name, container_name
+            ),
+            cwd=SCRIPT_DIR,
+            shell=True,
+        )
 
         # launch the new container
-        print("Trying to launch container from base image "
-              "{}".format(base_image))
-        run_command("lxc launch {} {} -p {}-profile || "
-                    "lxc launch {} {} -p {}-profile".format(base_image,
-                                                            container_name,
-                                                            container_name,
-                                                            default_image,
-                                                            container_name,
-                                                            container_name),
-                    shell=True)
+        print("Trying to launch container from base image {}".format(base_image))
+        run_command(
+            "lxc launch {} {} -p {}-profile || "
+            "lxc launch {} {} -p {}-profile".format(
+                base_image,
+                container_name,
+                container_name,
+                default_image,
+                container_name,
+                container_name,
+            ),
+            shell=True,
+        )
     except Exception as e:
         exit_with_error(str(e))

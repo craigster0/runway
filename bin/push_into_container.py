@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 
 import os
 import subprocess
@@ -7,9 +7,9 @@ import sys
 from shutil import copy
 
 SCRIPT_DIR = os.path.abspath(os.path.dirname(__file__))
-RUNWAY_DIR = os.path.abspath(os.path.join(SCRIPT_DIR, '..'))
-BIN_DIR = os.path.abspath(os.path.join(RUNWAY_DIR, 'bin'))
-TMP_FILES_DIR = os.path.abspath(os.path.join(RUNWAY_DIR, 'tmpfiles'))
+RUNWAY_DIR = os.path.abspath(os.path.join(SCRIPT_DIR, ".."))
+BIN_DIR = os.path.abspath(os.path.join(RUNWAY_DIR, "bin"))
+TMP_FILES_DIR = os.path.abspath(os.path.join(RUNWAY_DIR, "tmpfiles"))
 
 
 def _make_tmp_dir():
@@ -39,26 +39,37 @@ def push_into_container(container_name, src, dest):
     :return: str, bool
     """
     _make_tmp_copy(src)
-    cmd = "OPTIONALRUNWAYCNAME=1 QUIET=1 source " \
-          "lib/get_container_connection_options.sh && ssh -q -t " \
-          "${VAGRANTOPTIONS} ${RUNWAYHOST} lxc file push /vagrant/tmpfiles" \
-          "/%s %s%s" % (src, container_name, dest)
+    file_name = os.path.basename(src)
+    cmd = (
+        "OPTIONALRUNWAYCNAME=1 QUIET=1 source lib/get_container_connection_options.sh "
+        "&& ssh -q -t ${{VAGRANTOPTIONS}} ${{RUNWAYHOST}} lxc file push "
+        "/vagrant/tmpfiles/{} {}{}".format(file_name, container_name, dest)
+    )
     success = True
     try:
-        output = subprocess.check_output(cmd, shell=True, cwd=BIN_DIR)
+        cp = subprocess.run(
+            cmd,
+            shell=True,
+            cwd=BIN_DIR,
+            universal_newlines=True,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.STDOUT,
+            check=True,
+        )
+        output = cp.stdout.strip()
     except subprocess.CalledProcessError as e:
-        output = e.output
-        output += "\nPushing the file `{}` into the `{}` container failed." \
-                  "\n".format(src, container_name)
+        output = e.output.strip()
+        output += "\nPushing the file `{}` into the `{}` container failed.\n".format(
+            src, container_name
+        )
         output += e.message
         success = False
-    _delete_tmp_copy(src)
+    _delete_tmp_copy(file_name)
     return output, success
 
 
 if __name__ == "__main__":
-    usage = 'Usage: %s container_name source_file destination_file' \
-            % sys.argv[0]
+    usage = "Usage: {} container_name source_file destination_file".format(sys.argv[0])
     if len(sys.argv) != 4:
         print(usage)
         sys.exit(1)
@@ -72,6 +83,6 @@ if __name__ == "__main__":
         sys.exit(1)
 
     output, success = push_into_container(container_name, src, dest)
-    print(output)
     if not success:
+        print(output)
         sys.exit(1)

@@ -1,20 +1,21 @@
 import datetime
 import platform
 
-if platform.system() == 'Windows':
+if platform.system() == "Windows":
     from colorama import init
+
     init()
 
 
 class bcolors:
-    PINK = '\033[95m'
-    BLUE = '\033[94m'
-    GREEN = '\033[92m'
-    YELLOW = '\033[93m'
-    RED = '\033[91m'
-    ENDC = '\033[0m'
-    BOLD = '\033[1m'
-    UNDERLINE = '\033[4m'
+    PINK = "\033[95m"
+    BLUE = "\033[94m"
+    GREEN = "\033[92m"
+    YELLOW = "\033[93m"
+    RED = "\033[91m"
+    ENDC = "\033[0m"
+    BOLD = "\033[1m"
+    UNDERLINE = "\033[4m"
 
 
 def colorize(text, color):
@@ -54,5 +55,8 @@ def normal(text, logfile_path=None):
 def log(text, logfile_path):
     if logfile_path is not None:
         with open(logfile_path, "a") as logfile:
-            logfile.write("[{}] {}\n".format(
-                datetime.datetime.now().strftime("%F %H:%M:%S"), text))
+            logfile.write(
+                "[{}] {}\n".format(
+                    datetime.datetime.now().strftime("%F %H:%M:%S"), text
+                )
+            )

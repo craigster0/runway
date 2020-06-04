@@ -19,6 +19,7 @@ following requirements:
 - Run on Ubuntu 18.04.
 - Have an lvm volume group named `swift-runway-vg01`.
 - LXD version 3.0 or higher is installed.
+- Python 3
 
 We anticipate that some developers' development environments won't meet these
 requirements by default. Runway additionally provides an easy way to create a
@@ -29,6 +30,7 @@ development environment must satisfy these requirements:
 
 - VirtualBox version 5.2.8 or higher is installed.
 - Vagrant version 2.1.2 or higher is installed.
+- Python 3
 
 
 Manifests

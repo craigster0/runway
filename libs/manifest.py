@@ -127,7 +127,10 @@ class Manifest(object):
     def get_current_sha(self, dest_path):
         try:
             output = subprocess.check_output(
-                "git show -s --format=%H", shell=True, cwd=dest_path
+                "git show -s --format=%H",
+                shell=True,
+                cwd=dest_path,
+                universal_newlines=True,
             )
         except subprocess.CalledProcessError:
             return None
