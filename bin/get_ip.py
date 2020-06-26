@@ -12,7 +12,7 @@ VALID_FORMATS = {None, "json", "csv"}
 
 
 def clean_output(output):
-    lines = output.split("\r\n")
+    lines = output.split("\n")
     containers = []
     container_info = ""
     for line in lines:
