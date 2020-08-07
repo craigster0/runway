@@ -53,10 +53,7 @@ def create_workspace_dir(workspace_name=None):
     if workspace_name is None:
         # Get name for our new workspace
         user_provided_workspace = False
-        try:
-            workspace_name = get_new_workspace_name()
-        except Exception as e:
-            raise Exception(e.message)
+        workspace_name = get_new_workspace_name()
     else:
         user_provided_workspace = True
 

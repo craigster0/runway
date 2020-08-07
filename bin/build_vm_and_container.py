@@ -37,7 +37,7 @@ def get_manifest(workspace_name):
     try:
         return Manifest(manifest_path, workspace_path)
     except Exception as e:
-        exit_on_error(e.message)
+        exit_on_error(str(e))
 
 
 def vol_size_in_mebibytes(size_str):
@@ -156,7 +156,7 @@ if __name__ == "__main__":
             create_container_cmd += " --workspace {}".format(workspace_name)
         run_command(create_container_cmd, cwd=BIN_DIR)
     except Exception as e:
-        exit_on_error(e.message)
+        exit_on_error(str(e))
 
     elapsed_time = time.time() - start_time
 
