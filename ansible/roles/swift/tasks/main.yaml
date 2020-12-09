@@ -239,7 +239,7 @@
 # TODO: remove this once the situation with python-keystoneclient is fixed.
 # Same problem as with os-testr/stestr, but with
 # python-keystoneclient/keystoneauth1.
-- name: Force stestr older than 3.0.0 to be installed before os-testr
+- name: Force keystoneauth1 older than 4.0.0 to be installed before python-keystoneclient
   lineinfile:
     path: /home/swift/code/swift/test-requirements.txt
     line: keystoneauth1>=3.4.0,<4.0.0
@@ -248,12 +248,21 @@
 
 # TODO: remove this once the situation with keystonemiddleware is fixed.
 - # Starting with version 9.0.0, keystonemiddleware doesn't support Python 2.
-- name: Force stestr older than 3.0.0 to be installed before os-testr
+- name: Force keystonemiddleware older than 9.0.0
   lineinfile:
     path: /home/swift/code/swift/test-requirements.txt
     line: 'keystonemiddleware>=4.17.0,<9.0.0 # Apache-2.0'
     state: present
     regexp: '^keystonemiddleware>=4.17.0 # Apache-2.0$'
+
+# TODO: remove this once the situation with bandit is fixed.
+- # Starting with version 1.6.3, bandit doesn't support Python 2.
+- name: Force bandit older than 1.6.3
+  lineinfile:
+    path: /home/swift/code/swift/test-requirements.txt
+    line: 'bandit>=1.1.0,<1.6.3 # Apache-2.0'
+    state: present
+    regexp: '^bandit>=1.1.0 # Apache-2.0$'
 
 - name: install pip dependencies
   pip:
