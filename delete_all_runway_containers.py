@@ -54,8 +54,7 @@ parser.add_argument(
     "-p",
     "--prefix",
     default=None,
-    help="Prefix to look for when deleting. Default: "
-    "'{}'".format(DEFAULT_PREFIX),
+    help="Prefix to look for when deleting. Default: '{}'".format(DEFAULT_PREFIX),
 )
 
 args = parser.parse_args()
@@ -109,8 +108,7 @@ else:
             )
         except subprocess.CalledProcessError as err:
             print(
-                "Error deleting %s:\n%s"
-                % (logical_volume, err.stderr.rstrip()),
+                "Error deleting %s:\n%s" % (logical_volume, err.stderr.rstrip()),
                 file=sys.stderr,
             )
         else:
@@ -142,7 +140,11 @@ else:
 # delete container working spaces
 for entry_name in os.listdir("guest_workspaces"):
     entry_path = os.path.join("guest_workspaces", entry_name)
-    if entry_name == "README" or not os.path.isdir(entry_path):
+    if (
+        entry_name == "README"
+        or not os.path.isdir(entry_path)
+        or (prefix_was_provided and not entry_name.startswith(prefix))
+    ):
         continue
     print(entry_path)
     shutil.rmtree(entry_path)
