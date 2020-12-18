@@ -138,6 +138,7 @@ else:
     print("No profiles to delete")
 
 # delete container working spaces
+deleted_workspaces = 0
 for entry_name in os.listdir("guest_workspaces"):
     entry_path = os.path.join("guest_workspaces", entry_name)
     if (
@@ -146,8 +147,13 @@ for entry_name in os.listdir("guest_workspaces"):
         or (prefix_was_provided and not entry_name.startswith(prefix))
     ):
         continue
-    print(entry_path)
+    deleted_workspaces += 1
+    print("Deleting workspace at {}...".format(entry_path))
     shutil.rmtree(entry_path)
+if deleted_workspaces > 0:
+    print("{} workspaces deleted".format(deleted_workspaces))
+else:
+    print("No workspaces to delete")
 
 # delete snapshotted container images
 images_to_delete = []
