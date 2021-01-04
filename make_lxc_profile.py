@@ -69,6 +69,7 @@ for i in range(DRIVE_COUNT):
     create_command = "lvcreate -y --size %s --name '%s-vol%s' %s" % (
         DRIVE_SIZE, CNAME, i, VOLUME_GROUP)
     try:
+        print(create_command)
         p = subprocess.run(shlex.split(create_command), stdout=subprocess.PIPE,
                            check=True)
     except subprocess.CalledProcessError:
