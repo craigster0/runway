@@ -1,6 +1,10 @@
 # -*- mode: ruby -*-
 # vi: set ft=ruby :
 
+#
+#Copyright (c) 2016-2021, NVIDIA CORPORATION.
+#SPDX-License-Identifier: Apache-2.0
+
 DEFAULT_VOL_COUNT = "8"
 DEFAULT_VOL_SIZE = "10240"
 

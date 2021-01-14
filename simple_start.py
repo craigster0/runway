@@ -1,5 +1,9 @@
 #!/usr/bin/env python3
 
+#
+#Copyright (c) 2016-2021, NVIDIA CORPORATION.
+#SPDX-License-Identifier: Apache-2.0
+
 # simple start for setting up a new workspace and starting a guest
 # All options come from the manifest; there are no options for this tool
 

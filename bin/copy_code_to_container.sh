@@ -1,5 +1,9 @@
 #!/bin/bash
 
+#
+#Copyright (c) 2016-2021, NVIDIA CORPORATION.
+#SPDX-License-Identifier: Apache-2.0
+
 # this runs on the host and is called by a remote machine, given the name of
 # the code directory and the container to put it in
 

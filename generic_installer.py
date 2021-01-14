@@ -1,5 +1,9 @@
 #!/usr/bin/env python3
 
+#
+#Copyright (c) 2016-2021, NVIDIA CORPORATION.
+#SPDX-License-Identifier: Apache-2.0
+
 # Install every component other than libec, swiftclient, and swift
 # If a workspace is found, first we'll try to find an install command. If there
 # isn't one, let's try to find a script named install.sh in the root of the

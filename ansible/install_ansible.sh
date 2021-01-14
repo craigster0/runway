@@ -1,5 +1,9 @@
 #!/bin/bash
 
+#
+#Copyright (c) 2016-2021, NVIDIA CORPORATION.
+#SPDX-License-Identifier: Apache-2.0
+
 # if --debug is given in the list of arguments
 if [[ " $* " =~ " --debug " ]]; then
     set -x

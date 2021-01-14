@@ -1,5 +1,9 @@
 #!/bin/bash
 
+#
+#Copyright (c) 2016-2021, NVIDIA CORPORATION.
+#SPDX-License-Identifier: Apache-2.0
+
 # If a Runway container name is not provided, "CURRENT" will be used,
 # and the system will try to guess what's the most recent container.
 if [[ $# -gt 0 ]]; then

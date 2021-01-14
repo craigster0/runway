@@ -10,6 +10,10 @@
 # `vagrant destroy && vagrant up` from your runway directory (outside your VM).
 # It's slower, but we know no data will be kept other than the workspace.
 
+#
+#Copyright (c) 2016-2021, NVIDIA CORPORATION.
+#SPDX-License-Identifier: Apache-2.0
+
 #!/bin/bash
 
 if [ `id -u` -ne 0 ]; then

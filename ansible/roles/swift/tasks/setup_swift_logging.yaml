@@ -1,4 +1,9 @@
 # configure syslog
+
+#
+#Copyright (c) 2016-2021, NVIDIA CORPORATION.
+#SPDX-License-Identifier: Apache-2.0
+
 ---
 - name: copy swift log file
   copy:

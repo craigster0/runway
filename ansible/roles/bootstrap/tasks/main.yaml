@@ -1,4 +1,9 @@
 # set up drives and mount them
+
+#
+#Copyright (c) 2016-2021, NVIDIA CORPORATION.
+#SPDX-License-Identifier: Apache-2.0
+
 ---
 - name: yum install anticipated packages for building/running swift
   yum:
