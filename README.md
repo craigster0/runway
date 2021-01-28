@@ -141,40 +141,13 @@ Startup script for ProxyFS containers
 --------------------------------------
 
 Once you're in the container, the first thing you'll probably want to do is
-start Swift, ProxyFS, all of the related services and mount an SMB mount point
-and/or an NFS mount point:
+start Swift, ProxyFS, all of the related services and mount a PFSAgent mount point:
 
 ```bash
 sudo start_and_mount_pfs
 ```
 
-Running the command above without any extra arguments will mount an SMB mount
-point at `/mnt/smb_proxyfs_mount` using protocol version `3.0` and an NFS mount
-point at `/mnt/nfs_proxyfs_mount` using protocol version `3`.
-
-If you only need one type of mount point or if you want a specific version of a
-protocol, you can specify it when running the script. Here's a complete list
-with all the options:
-
-- `all` (default option): mount an SMB mount
-point at `/mnt/smb_proxyfs_mount` using protocol version `3.0` and an NFS mount
-point at `/mnt/nfs_proxyfs_mount` using protocol version `3`.
-- `smb`/`smb3`: mount an SMB mount point at `/mnt/smb_proxyfs_mount` using
-protocol version `3.0`.
-- `smb1`: mount an SMB mount point at `/mnt/smb_proxyfs_mount` using protocol
-version `1.0`.
-- `smb2`: mount an SMB mount point at `/mnt/smb_proxyfs_mount` using protocol
-version `2.1`.
-- `nfs`: mount an NFS mount point at `/mnt/nfs_proxyfs_mount` using protocol
-version `3`.
-
-Usage example:
-
-```bash
-sudo start_and_mount_pfs smb2
-```
-
-_NOTE: running `start_and_mount_pfs` again will unmount all the mount points,
+_NOTE: running `start_and_mount_pfs` again will unmount your mount point,
 stop all the services in the appropriate order and then start and mount again._
 
 
