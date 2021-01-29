@@ -50,7 +50,7 @@ if __name__ == "__main__":
     try:
         new_workspace_path = create_workspace_dir(workspace_name)
     except Exception as e:
-        exit_with_error(e.message)
+        exit_with_error(str(e))
 
     colorprint.info(
         "\nRetrieving components into workspace at '{}'..."
@@ -67,7 +67,7 @@ if __name__ == "__main__":
         current_manifest = Manifest(manifest_copy_path, new_workspace_path)
         current_manifest.retrieve_components()
     except Exception as e:
-        exit_with_error(e.message)
+        exit_with_error(str(e))
 
     colorprint.success(
         "Guest workspace successfully set up at " "'{}'.".format(new_workspace_path)
